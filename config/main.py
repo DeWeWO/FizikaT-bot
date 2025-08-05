@@ -2,17 +2,16 @@ from config import BOT_TOKEN
 import asyncio
 import logging
 import sys
-from os import getenv
-
 from aiogram import Bot, Dispatcher, html, types, F
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
+from db import create_users_table
 
 TOKEN = BOT_TOKEN
-
 dp = Dispatcher()
+db = create_users_table()
 
 @dp.message(CommandStart())
 async def command_start(message: Message) -> None:
