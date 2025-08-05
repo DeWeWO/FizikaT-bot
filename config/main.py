@@ -7,11 +7,13 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
-from db import create_users_table, add_new_user
+from db import create_users_table, add_new_user, create_new_registered_user_table
+from buttons import main_markup
 
 TOKEN = BOT_TOKEN
 dp = Dispatcher()
 # db = create_users_table()
+create_new_registered_user_table()
 
 @dp.message(CommandStart())
 async def command_start(message: Message) -> None:
@@ -24,30 +26,11 @@ async def command_start(message: Message) -> None:
     except Exception as error:
         logging.error(error)
     finally:
-        await message.answer(f"Hello, {first_name}!\n\nSizing id: {telegram_id}")
+        await message.answer(f"Hello, {first_name}!\n\nSizing id: {telegram_id}", reply_markup=main_markup())
 
-@dp.message(F.photo)
-async def get_photo(message: types.Message):
-    photo_id = message.photo[-1].file_id
-    
-@dp.message(Command('help'))
-async def do_help(message: types.Message):
-    await message.reply("Qanday yordam berishim mumkin?")
-
-@dp.message(Command('photo'))
-async def send_photo(message: types.Message):
-    await message.answer_photo(photo="https://docs.aiogram.dev/en/v3.21.0/_static/logo.png", caption="Aiogram bn qurilgan bot!")
-
-@dp.message(F.text == "salom")
-async def send_answer(message: types.Message):
-    await message.answer("Voleykum assalom")
-
-@dp.message()
-async def echo(message: Message) -> None:
-    try:
-        await message.send_copy(chat_id=message.chat.id)
-    except TypeError:
-        await message.answer("Nice try!")
+@dp.message(F.text == "👤Ro'yxatdan o'tish")
+async def start_register(message: types.Message):
+    pass
 
 async def main() -> None:
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
