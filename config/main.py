@@ -16,7 +16,7 @@ from states import RegisterState
 TOKEN = BOT_TOKEN
 dp = Dispatcher(storage=MemoryStorage())
 # db = create_users_table()
-create_new_registered_user_table()
+# create_new_registered_user_table()
 
 @dp.message(CommandStart())
 async def command_start(message: Message) -> None:
@@ -62,6 +62,19 @@ async def get_group(message: types.Message, state: FSMContext):
     await message.answer(f"{text}\n\n<b>Ma'lumotlaringiz to'g'riligini tasdiqlang</b>", reply_markup=get_confirm_button())
     await state.set_state(state=RegisterState.confirm)
 
+@dp.callback_query(F.data == 'confirm', RegisterState.confirm)
+async def save_register_user(call: types.CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    # 
+    await call.message.delete()
+    await call.message.answer("Ma'lumotlar saqlandi!", reply_markup=main_markup())
+    await state.clear()
+
+@dp.callback_query(F.data == 'cancel', RegisterState.confirm)
+async def cancel_register(call: types.CallbackQuery, state: FSMContext):
+    await call.message.delete()
+    await call.message.answer("Asosiy menyu", reply_markup=main_markup())
+    await state.clear()
 
 async def main() -> None:
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))

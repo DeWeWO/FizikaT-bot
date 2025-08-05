@@ -10,6 +10,6 @@ def main_markup():
     
 def get_confirm_button():
     builder = InlineKeyboardBuilder()
-    builder.add(InlineKeyboardButton(text="Tasdiqlash ✅", callback_data="correct"))
-    builder.add(InlineKeyboardButton(text="Bekor qilish ❌", callback_data="correct"))
+    builder.add(InlineKeyboardButton(text="Tasdiqlash ✅", callback_data="confirm"))
+    builder.add(InlineKeyboardButton(text="Bekor qilish ❌", callback_data="cancel"))
     return builder.as_markup()
