@@ -7,17 +7,24 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
-from db import create_users_table
+from db import create_users_table, add_new_user
 
 TOKEN = BOT_TOKEN
 dp = Dispatcher()
-db = create_users_table()
+# db = create_users_table()
 
 @dp.message(CommandStart())
 async def command_start(message: Message) -> None:
-    telegram_id = message.from_user.id
-    first_name = message.from_user.first_name
-    await message.answer(f"Hello, {first_name}!\nSizing id: {telegram_id}")
+    try:
+        telegram_id = message.from_user.id
+        first_name = message.from_user.first_name
+        last_name = message.from_user.last_name
+        username = message.from_user.username
+        add_new_user(telegram_id, first_name, last_name, username, '', '')
+    except Exception as error:
+        logging.error(error)
+    finally:
+        await message.answer(f"Hello, {first_name}!\n\nSizing id: {telegram_id}")
     
 @dp.message(Command('help'))
 async def do_help(message: types.Message):
