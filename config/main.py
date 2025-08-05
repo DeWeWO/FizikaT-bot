@@ -25,6 +25,10 @@ async def command_start(message: Message) -> None:
         logging.error(error)
     finally:
         await message.answer(f"Hello, {first_name}!\n\nSizing id: {telegram_id}")
+
+@dp.message(F.photo)
+async def get_photo(message: types.Message):
+    photo_id = message.photo[-1].file_id
     
 @dp.message(Command('help'))
 async def do_help(message: types.Message):
