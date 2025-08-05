@@ -4,7 +4,7 @@ import logging
 import sys
 from os import getenv
 
-from aiogram import Bot, Dispatcher, html, types
+from aiogram import Bot, Dispatcher, html, types, F
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart, Command
@@ -28,6 +28,9 @@ async def do_help(message: types.Message):
 async def send_photo(message: types.Message):
     await message.answer_photo(photo="https://docs.aiogram.dev/en/v3.21.0/_static/logo.png", caption="Aiogram bn qurilgan bot!")
 
+@dp.message(F.text == "salom")
+async def send_answer(message: types.Message):
+    await message.answer("Voleykum assalom")
 
 @dp.message()
 async def echo(message: Message) -> None:
