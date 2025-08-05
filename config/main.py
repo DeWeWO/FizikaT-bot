@@ -28,6 +28,7 @@ async def do_help(message: types.Message):
 async def send_photo(message: types.Message):
     await message.answer_photo(photo="https://docs.aiogram.dev/en/v3.21.0/_static/logo.png", caption="Aiogram bn qurilgan bot!")
 
+
 @dp.message()
 async def echo(message: Message) -> None:
     try:
