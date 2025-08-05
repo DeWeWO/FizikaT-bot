@@ -66,7 +66,6 @@ async def get_group(message: types.Message, state: FSMContext):
 async def save_register_user(call: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     
-    
     try:
         fio = data.get('fio')
         discipline = data.get('discipline')
@@ -76,9 +75,6 @@ async def save_register_user(call: types.CallbackQuery, state: FSMContext):
         logging.error(error)
         await call.message.answer(f"Ma'lumotlarni bazaga yozishda xatolik yuz berdi.\nQaytadan urinib ko'ring", reply_markup=main_markup())
       
-    
-    
-    
     await call.message.delete()
     await call.message.answer("Ma'lumotlar saqlandi!", reply_markup=main_markup())
     await state.clear()
