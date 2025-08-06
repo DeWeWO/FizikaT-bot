@@ -52,6 +52,17 @@ class Database:
         );
         """
         await self.execute(sql, execute=True)
+    
+    async def create_register_users(self):
+        sql = """
+        CREATE TABLE IF NOT EXISTS register (
+        id SERIAL PRIMARY KEY,
+        fio VARCHAR(100) NOT NULL,
+        discipline VARCHAR(255) NOT NULL,
+        user_group VARCHAR(100) NOT NULL
+        );
+        """
+        await self.execute(sql, execute=True)
 
     @staticmethod
     def format_args(sql, parameters: dict):
@@ -63,6 +74,10 @@ class Database:
     async def add_user(self, full_name, username, telegram_id):
         sql = "INSERT INTO users (full_name, username, telegram_id) VALUES($1, $2, $3) returning *"
         return await self.execute(sql, full_name, username, telegram_id, fetchrow=True)
+    
+    async def registered_user(self, fio, discipline, user_group):
+        sql = "INSERT INTO register (fio, discipline, user_group) VALUES($1, $2, $3) returning *"
+        return await self.execute(sql, fio, discipline, user_group, fetchrow=True)
 
     async def select_all_users(self):
         sql = "SELECT * FROM Users"

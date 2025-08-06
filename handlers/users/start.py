@@ -5,6 +5,7 @@ from aiogram.client.session.middlewares.request_logging import logger
 from loader import db, bot
 from data.config import ADMINS
 from utils.extra_datas import make_title
+from keyboards.reply.buttons import register_markup
 
 router = Router()
 
@@ -46,4 +47,4 @@ async def do_start(message: types.Message):
             )
         except Exception as error:
             logger.info(f"Data did not send to admin: {admin}. Error: {error}")
-    await message.answer(f"Assalomu alaykum {make_title(full_name)}\!", parse_mode=ParseMode.MARKDOWN_V2)
+    await message.answer(f"Assalomu alaykum {make_title(full_name)}\!", parse_mode=ParseMode.MARKDOWN_V2, reply_markup=register_markup())

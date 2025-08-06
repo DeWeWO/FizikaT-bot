@@ -1,7 +1,7 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-def main_markup(): 
+def register_markup(): 
     return ReplyKeyboardMarkup(resize_keyboard=True, keyboard=[
         [
             KeyboardButton(text="👤Ro'yxatdan o'tish")
