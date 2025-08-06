@@ -2,6 +2,8 @@ import asyncio
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.session.middlewares.request_logging import logger
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 from loader import db
 
 
@@ -70,7 +72,7 @@ def main():
     from aiogram.enums import ParseMode
     from aiogram.fsm.storage.memory import MemoryStorage
 
-    bot = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML)
+    bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     storage = MemoryStorage()
     dispatcher = Dispatcher(storage=storage)
 
