@@ -16,6 +16,6 @@ def get_confirm_button():
 
 def web_app():
     murkup = ReplyKeyboardMarkup(keyboard=[
-        [KeyboardButton(text='📝 Test ishlash', web_app=WebAppInfo(url='https://d9950370c04e.ngrok-free.app'))]
+        [KeyboardButton(text='📝 Test ishlash')]
     ], resize_keyboard=True)
     return murkup
