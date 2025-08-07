@@ -3,7 +3,7 @@ from aiogram import types, F, Router
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 from loader import db
-from keyboards.reply.buttons import register_markup, get_confirm_button, web_app
+from keyboards.reply.buttons import register_markup, get_confirm_button, get_test
 from states import RegisterState
 
 router = Router()
@@ -30,7 +30,7 @@ async def save_register_user(call: types.CallbackQuery, state: FSMContext):
         fio = data.get('fio')
         await db.registered_user(fio)
         await call.message.delete()
-        await call.message.answer("Ma'lumotingiz saqlandi!", reply_markup=web_app())
+        await call.message.answer("Ma'lumotingiz saqlandi!", reply_markup=get_test())
     except Exception as error:
         logging.error(error)
         await call.message.answer(f"Ma'lumotingizni bazaga yozishda xatolik yuz berdi.\nQaytadan urinib ko'ring", reply_markup=register_markup())

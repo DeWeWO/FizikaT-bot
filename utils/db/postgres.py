@@ -83,6 +83,10 @@ class Database:
     async def select_all_users(self):
         sql = "SELECT * FROM Users"
         return await self.execute(sql, fetch=True)
+    
+    async def get_user(self, telegram_id):
+        sql = "SELECT * FROM users WHERE telegram_id = $1"
+        return await self.execute(sql, telegram_id, fetchrow=True)
 
     async def select_user(self, **kwargs):
         sql = "SELECT * FROM Users WHERE "

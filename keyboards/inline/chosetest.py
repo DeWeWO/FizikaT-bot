@@ -13,15 +13,23 @@ async def fetch_categories():
             return await resp.json()
 
 def generate_category_text(categories, page):
+    PAGE_SIZE = 10  # yoki tashqarida aniqlangan bo‘lsa, olib tashlang
     start = page * PAGE_SIZE
     end = start + PAGE_SIZE
     selected = categories[start:end]
 
     lines = []
     for i, cat in enumerate(selected, start=1):
-        lines.append(f"{i}. category/{cat['slug']}")
+        title = cat.get("title", "Noma'lum")
+        description = cat.get("description", "")
+
+        # Description ni 50 belgigacha qisqartiramiz (oxiriga "..." qo‘shamiz agar uzun bo‘lsa)
+        short_desc = (description[:20] + "...") if len(description) > 50 else description
+
+        lines.append(f"{i}. <b>{title}.</b>\n<i>{short_desc}</i>")
 
     return "\n".join(lines)
+
 
 def generate_category_buttons(categories, page):
     start = page * PAGE_SIZE

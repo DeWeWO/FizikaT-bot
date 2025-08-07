@@ -1,1 +1,1 @@
-from .buttons import register_markup, get_confirm_button, web_app
+from .buttons import register_markup, get_confirm_button, get_test

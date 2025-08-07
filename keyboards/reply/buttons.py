@@ -14,7 +14,7 @@ def get_confirm_button():
     builder.add(InlineKeyboardButton(text="Bekor qilish ❌", callback_data="cancel"))
     return builder.as_markup()
 
-def web_app():
+def get_test():
     murkup = ReplyKeyboardMarkup(keyboard=[
         [KeyboardButton(text='📝 Test ishlash')]
     ], resize_keyboard=True)
