@@ -17,26 +17,9 @@ async def start_register(message: types.Message, state: FSMContext):
 async def get_fio(message: types.Message, state: FSMContext):
     fio = message.text
     await state.update_data({"fio": fio})
-    await message.answer("<b>✅ Yo'nalishingizni kiriting:</b>\n\n<i>Na'muna: Axborot xavfsizligi</i>")
-    await state.set_state(state=RegisterState.discipline)
-
-@router.message(RegisterState.discipline, F.text)
-async def get_discipline(message: types.Message, state: FSMContext):
-    discipline = message.text
-    if discipline:
-        await state.update_data({"discipline": discipline})
-        await message.answer("<b>👥 guruhingizni kiriting:</b>\n\n<i>Na'muna: 401</i>")
-        await state.set_state(state=RegisterState.user_group)
-    else:
-        await message.answer("Yo'nalishingizni to'g'ri kiriting")
-
-@router.message(RegisterState.user_group, F.text)
-async def get_group(message: types.Message, state: FSMContext):
-    user_group = message.text
-    await state.update_data({"user_group": user_group})
     data = await state.get_data()
-    text = f"👤FISH: {data.get('fio')}\n⤴️Yo'nalish: {data.get('discipline')}\n👥Guruh: {data.get('user_group')}"
-    await message.answer(f"{text}\n\n<b>Ma'lumotlaringiz to'g'riligini tasdiqlang</b>", reply_markup=get_confirm_button())
+    text = f"👤FISH: {data.get('fio')}"
+    await message.answer(f"{text}\n\n<b>Ma'lumotingizni tasdiqlang ✅</b>", reply_markup=get_confirm_button())
     await state.set_state(state=RegisterState.confirm)
 
 @router.callback_query(F.data == 'confirm', RegisterState.confirm)
@@ -45,14 +28,12 @@ async def save_register_user(call: types.CallbackQuery, state: FSMContext):
     
     try:
         fio = data.get('fio')
-        discipline = data.get('discipline')
-        user_group = data.get('user_group')
-        await db.registered_user(fio, discipline, user_group)
+        await db.registered_user(fio)
         await call.message.delete()
-        await call.message.answer("Ma'lumotlar saqlandi!", reply_markup=web_app())
+        await call.message.answer("Ma'lumotingiz saqlandi!", reply_markup=web_app())
     except Exception as error:
         logging.error(error)
-        await call.message.answer(f"Ma'lumotlarni bazaga yozishda xatolik yuz berdi.\nQaytadan urinib ko'ring", reply_markup=register_markup())
+        await call.message.answer(f"Ma'lumotingizni bazaga yozishda xatolik yuz berdi.\nQaytadan urinib ko'ring", reply_markup=register_markup())
     finally:
         await state.clear()
 

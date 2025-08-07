@@ -57,29 +57,10 @@ class Database:
         sql = """
         CREATE TABLE IF NOT EXISTS register (
         id SERIAL PRIMARY KEY,
-        fio VARCHAR(100) NOT NULL,
-        discipline VARCHAR(255) NOT NULL,
-        user_group VARCHAR(100) NOT NULL
+        fio VARCHAR(100) NOT NULL
         );
         """
-        await self.execute(sql, execute=True)
-    
-    
-    async def create_questions(self):
-        sql = """
-        CREATE TABLE IF NOT EXISTS questions  (
-        id SERIAL PRIMARY KEY,
-        question_text TEXT,
-        image_file_id TEXT,
-        v1 TEXT,
-        v2 TEXT,
-        v3 TEXT,
-        v4 TEXT,
-        correct_index SMALLINT CHECK (correct_index >= 0 AND correct_index <= 3)
-        );
-        """
-        await self.execute(sql, execute=True)
-    
+        await self.execute(sql, execute=True)    
 
     @staticmethod
     def format_args(sql, parameters: dict):
@@ -94,17 +75,11 @@ class Database:
         return await self.execute(sql, full_name, username, telegram_id, fetchrow=True)
     
     # Register user
-    async def registered_user(self, fio, discipline, user_group):
-        sql = "INSERT INTO register (fio, discipline, user_group) VALUES($1, $2, $3) returning *"
-        return await self.execute(sql, fio, discipline, user_group, fetchrow=True)
+    async def registered_user(self, fio):
+        sql = "INSERT INTO register (fio) VALUES($1) returning *"
+        return await self.execute(sql, fio, fetchrow=True)
     
     
-    # create test
-    async def add_question(self, question_text, image_file_id, v1, v2, v3, v4, correct_index):
-        sql = "INSERT INTO questions (question_text, image_file_id, v1, v2, v3, v4, correct_index) VALUES ($1, $2, $3, $4, $5, $6, $7) returning *"
-        return await self.execute(sql, question_text, image_file_id, v1, v2, v3, v4, correct_index, fetchrow=True)
-
-
     async def select_all_users(self):
         sql = "SELECT * FROM Users"
         return await self.execute(sql, fetch=True)
