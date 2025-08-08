@@ -197,6 +197,16 @@ class APIClient:
         }
         return await self.request("POST", "api/questions/check_answers/?format=api", json=payload, return_html=True)
 
+    # --- TEST RESULTS ---
+    async def get_user_test_results(self, telegram_id: int) -> Optional[List[Dict]]:
+        """Foydalanuvchining test natijalarini olish"""
+        result = await self.request("GET", f"test-results/?telegram_id={telegram_id}")
+        return result.get('results') if result and 'results' in result else result
+    
+    async def get_user_stats(self, telegram_id: int) -> Optional[Dict]:
+        """Foydalanuvchi statistikasi"""
+        return await self.request("GET", f"test-results/user_stats/?telegram_id={telegram_id}")
+
     # --- UTILITY METHODS ---
     async def health_check(self) -> bool:
         """API server holatini tekshirish"""

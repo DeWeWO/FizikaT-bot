@@ -17,6 +17,7 @@ def get_confirm_button():
 def get_test():
     murkup = ReplyKeyboardMarkup(keyboard=[
         [KeyboardButton(text='📝 Test ishlash')],
-        [KeyboardButton(text='✏️ Ismni tahrirlash')]
-    ], resize_keyboard=True)
+        [KeyboardButton(text='✏️ Ismni tahrirlash')],
+        [KeyboardButton(text="📊 Statistika"), KeyboardButton(text="🏆 Mening natijalarim")]
+    ], resize_keyboard=True, one_time_keyboard=False)
     return murkup
