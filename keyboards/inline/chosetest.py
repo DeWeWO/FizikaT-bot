@@ -4,7 +4,7 @@ import aiohttp
 
 router = Router()
 
-API_CATEGORIES_URL = "http://127.0.0.1:8000/api/categories/"  # sizning DRF API manzilingiz
+API_CATEGORIES_URL = "https://dd2b680720c7.ngrok-free.app/api/categories/"  # sizning DRF API manzilingiz
 PAGE_SIZE = 10
 
 async def fetch_categories():
