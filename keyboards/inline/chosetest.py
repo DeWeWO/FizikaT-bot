@@ -1,19 +1,18 @@
-from aiogram import Router
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-import aiohttp
+from utils.db.postgres import api_client
 
-router = Router()
-
-API_CATEGORIES_URL = "https://dd2b680720c7.ngrok-free.app/api/categories/"  # sizning DRF API manzilingiz
 PAGE_SIZE = 10
 
 async def fetch_categories():
-    async with aiohttp.ClientSession() as session:
-        async with session.get(API_CATEGORIES_URL) as resp:
-            return await resp.json()
+    try:
+        result = await api_client.get_categories()
+        if result and 'results' in result:
+            return result['results']
+        return result if result else []
+    except:
+        return []
 
 def generate_category_text(categories, page):
-    PAGE_SIZE = 10  # yoki tashqarida aniqlangan bo‘lsa, olib tashlang
     start = page * PAGE_SIZE
     end = start + PAGE_SIZE
     selected = categories[start:end]
@@ -22,14 +21,11 @@ def generate_category_text(categories, page):
     for i, cat in enumerate(selected, start=1):
         title = cat.get("title", "Noma'lum")
         description = cat.get("description", "")
-
-        # Description ni 50 belgigacha qisqartiramiz (oxiriga "..." qo‘shamiz agar uzun bo‘lsa)
-        short_desc = (description[:20] + "...") if len(description) > 50 else description
-
-        lines.append(f"{i}. <b>{title}.</b>\n<i>{short_desc}</i>")
+        
+        short_desc = (description[:20] + "...") if len(description) > 20 else description
+        lines.append(f"{i}. <b>{title}</b>\n<i>{short_desc}</i>")
 
     return "\n".join(lines)
-
 
 def generate_category_buttons(categories, page):
     start = page * PAGE_SIZE
@@ -38,7 +34,7 @@ def generate_category_buttons(categories, page):
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[])
 
-    # Har bir category uchun [1], [2], [3], ... tugma — 5 tadan 2 qatorga ajratiladi
+    # Kategoriya tugmalari
     row = []
     for i, cat in enumerate(selected, start=1):
         btn = InlineKeyboardButton(
@@ -46,13 +42,12 @@ def generate_category_buttons(categories, page):
             callback_data=f"select_category:{cat['slug']}"
         )
         row.append(btn)
-        if i % 5 == 0:  # har 5 tadan keyin yangi qator
+        if i % 5 == 0:
             keyboard.inline_keyboard.append(row)
             row = []
 
-    if row:  # agar oxirida 5 tadan kam tugma qolgan bo‘lsa, ularni ham qo‘shamiz
+    if row:
         keyboard.inline_keyboard.append(row)
-
 
     # Navigatsiya tugmalari
     nav = []

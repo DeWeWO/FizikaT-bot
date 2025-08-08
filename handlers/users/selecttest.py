@@ -4,7 +4,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
 router = Router()
 
-WEBAPP_BASE_URL = "https://dd2b680720c7.ngrok-free.app/"  # Django WebApp manzilingiz
+WEBAPP_BASE_URL = "https://ec30657ce5b6.ngrok-free.app/api/categories/"
 
 @router.callback_query(F.data.startswith("select_category:"))
 async def select_category(callback: types.CallbackQuery, state: FSMContext):
@@ -14,10 +14,10 @@ async def select_category(callback: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     categories = data.get("categories", [])
 
-    # Slug bo‘yicha title topish
+    # Slug bo'yicha title topish
     category_title = next(
         (cat["title"] for cat in categories if cat["slug"] == slug),
-        slug  # agar topilmasa, slugni o‘zini ishlatadi
+        slug  # agar topilmasa, slugni o'zini ishlatadi
     )
 
     # WebApp tugma
@@ -26,7 +26,7 @@ async def select_category(callback: types.CallbackQuery, state: FSMContext):
             [
                 InlineKeyboardButton(
                     text="🚀 Testni boshlash",
-                    web_app=WebAppInfo(url=f"{WEBAPP_BASE_URL}{slug}")
+                    web_app=WebAppInfo(url=f"{WEBAPP_BASE_URL}{slug}/questions/")
                 )
             ]
         ]

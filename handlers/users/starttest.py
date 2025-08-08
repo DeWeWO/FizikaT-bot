@@ -7,6 +7,10 @@ router = Router()
 @router.message(F.text == "📝 Test ishlash")
 async def handle_test_start(message: types.Message, state: FSMContext):
     categories = await fetch_categories()
+    if not categories:
+        await message.answer("❌ Kategoriyalar yuklanmadi. Keyinroq qayta urinib ko'ring.")
+        return
+    
     await state.update_data(categories=categories)
     page = 0
     text = generate_category_text(categories, page)
@@ -18,6 +22,11 @@ async def navigate_categories(callback: types.CallbackQuery, state: FSMContext):
     page = int(callback.data.split(":")[1])
     data = await state.get_data()
     categories = data.get("categories", [])
+    
+    if not categories:
+        await callback.answer("❌ Kategoriyalar topilmadi", show_alert=True)
+        return
+    
     text = generate_category_text(categories, page)
     keyboard = generate_category_buttons(categories, page)
     await callback.message.edit_text(f"📜 Mavjud variantlar (sahifa {page+1}):\n\n{text}", reply_markup=keyboard)
