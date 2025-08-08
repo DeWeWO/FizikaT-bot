@@ -4,7 +4,7 @@ from filters import ChatPrivateFilter
 
 
 def setup_routers() -> Router:
-    from .users import admin, start, help, echo, register, starttest
+    from .users import admin, start, help, echo, register, starttest, updateFIO
     from .errors import error_handler
 
     router = Router()
@@ -12,6 +12,6 @@ def setup_routers() -> Router:
     # Agar kerak bo'lsa, o'z filteringizni o'rnating
     start.router.message.filter(ChatPrivateFilter(chat_type=["private"]))
 
-    router.include_routers(admin.router, start.router, register.router, starttest.router, help.router, echo.router, error_handler.router)
+    router.include_routers(admin.router, start.router, register.router, updateFIO.router, starttest.router, help.router, echo.router, error_handler.router)
 
     return router

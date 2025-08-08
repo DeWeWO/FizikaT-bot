@@ -44,10 +44,11 @@ class Database:
 
     async def create_table_users(self):
         sql = """
-        CREATE TABLE IF NOT EXISTS Users (
+        CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
-        full_name VARCHAR(255) NOT NULL,
-        username varchar(255) NULL,
+        first_name VARCHAR(255) NOT NULL,
+        last_name VARCHAR(255) NOT NULL,
+        username VARCHAR(255) NULL,
         telegram_id BIGINT NOT NULL UNIQUE
         );
         """
@@ -57,7 +58,8 @@ class Database:
         sql = """
         CREATE TABLE IF NOT EXISTS register (
         id SERIAL PRIMARY KEY,
-        fio VARCHAR(100) NOT NULL
+        fio VARCHAR(255) NOT NULL,
+        telegram_id BIGINT NOT NULL UNIQUE
         );
         """
         await self.execute(sql, execute=True)    
@@ -70,18 +72,26 @@ class Database:
         return sql, tuple(parameters.values())
 
     # New User
-    async def add_user(self, full_name, username, telegram_id):
-        sql = "INSERT INTO users (full_name, username, telegram_id) VALUES($1, $2, $3) returning *"
-        return await self.execute(sql, full_name, username, telegram_id, fetchrow=True)
+    async def add_user(self, first_name, last_name, username, telegram_id):
+        sql = """
+        INSERT INTO users (first_name, last_name, username, telegram_id) 
+        VALUES($1, $2, $3, $4) 
+        RETURNING *;
+        """
+        return await self.execute(sql, first_name, last_name, username, telegram_id, fetchrow=True)
     
     # Register user
-    async def registered_user(self, fio):
-        sql = "INSERT INTO register (fio) VALUES($1) returning *"
-        return await self.execute(sql, fio, fetchrow=True)
+    async def registered_user(self, fio, telegram_id):
+        sql = """
+        INSERT INTO register (fio, telegram_id) 
+        VALUES($1, $2) 
+        RETURNING *;
+        """
+        return await self.execute(sql, fio, telegram_id, fetchrow=True)
     
     
     async def select_all_users(self):
-        sql = "SELECT * FROM Users"
+        sql = "SELECT * FROM users"
         return await self.execute(sql, fetch=True)
     
     async def get_user(self, telegram_id):
@@ -89,20 +99,25 @@ class Database:
         return await self.execute(sql, telegram_id, fetchrow=True)
 
     async def select_user(self, **kwargs):
-        sql = "SELECT * FROM Users WHERE "
+        sql = "SELECT * FROM users WHERE "
         sql, parameters = self.format_args(sql, parameters=kwargs)
         return await self.execute(sql, *parameters, fetchrow=True)
 
     async def count_users(self):
-        sql = "SELECT COUNT(*) FROM Users"
+        sql = "SELECT COUNT(*) FROM users"
         return await self.execute(sql, fetchval=True)
 
     async def update_user_username(self, username, telegram_id):
-        sql = "UPDATE Users SET username=$1 WHERE telegram_id=$2"
+        sql = "UPDATE users SET username=$1 WHERE telegram_id=$2"
         return await self.execute(sql, username, telegram_id, execute=True)
+    
+    async def update_fio(self, new_fio, telegram_id):
+        sql = "UPDATE register SET fio = $1 WHERE telegram_id = $2"
+        return await self.execute(sql, new_fio, telegram_id, execute=True)
+
 
     async def delete_users(self):
-        await self.execute("DELETE FROM Users WHERE TRUE", execute=True)
+        await self.execute("DELETE FROM users WHERE TRUE", execute=True)
 
     async def drop_users(self):
-        await self.execute("DROP TABLE Users", execute=True)
+        await self.execute("DROP TABLE users", execute=True)
