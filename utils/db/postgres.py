@@ -74,66 +74,6 @@ class APIClient:
         except Exception:
             return None
 
-    # --- USERS ---
-    async def add_user(self, first_name: str, last_name: str, username: str, telegram_id: int) -> Optional[Dict]:
-        """Yangi foydalanuvchi qo'shish yoki mavjudini yangilash"""
-        payload = {
-            "first_name": first_name,
-            "last_name": last_name,
-            "username": username,
-            "telegram_id": telegram_id
-        }
-        return await self.request("POST", "users/get_or_create_user/", json=payload)
-
-    async def select_all_users(self) -> Optional[List[Dict]]:
-        """Barcha foydalanuvchilarni olish"""
-        result = await self.request("GET", "users/")
-        return result.get('results') if result and 'results' in result else result
-
-    async def get_user(self, telegram_id: int) -> Optional[Dict]:
-        """Telegram ID bo'yicha foydalanuvchi topish"""
-        return await self.request("GET", f"users/{telegram_id}/")
-
-    async def select_user(self, **kwargs) -> Optional[List[Dict]]:
-        """Filtrlash orqali foydalanuvchi qidirish"""
-        if not kwargs:
-            return await self.select_all_users()
-        
-        # URL-safe params yaratish
-        params = []
-        for k, v in kwargs.items():
-            if v is not None:
-                params.append(f"{k}={v}")
-        
-        query_string = "&".join(params)
-        result = await self.request("GET", f"users/?{query_string}")
-        return result.get('results') if result and 'results' in result else result
-
-    async def count_users(self) -> int:
-        """Foydalanuvchilar sonini hisoblash"""
-        result = await self.request("GET", "users/")
-        if result:
-            if 'count' in result:
-                return result['count']
-            elif 'results' in result:
-                return len(result['results'])
-            elif isinstance(result, list):
-                return len(result)
-        return 0
-
-    async def update_user(self, telegram_id: int, **kwargs) -> Optional[Dict]:
-        """Foydalanuvchi ma'lumotlarini yangilash"""
-        # Faqat None bo'lmagan qiymatlarni yuborish
-        payload = {k: v for k, v in kwargs.items() if v is not None}
-        if payload:
-            return await self.request("PATCH", f"users/{telegram_id}/", json=payload)
-        return None
-
-    async def delete_user(self, telegram_id: int) -> bool:
-        """Bitta foydalanuvchini o'chirish"""
-        result = await self.request("DELETE", f"users/{telegram_id}/")
-        return result is not None
-
     # --- REGISTER ---
     async def registered_user(self, fio: str, telegram_id: int) -> Optional[Dict]:
         """Foydalanuvchini ro'yxatga olish"""
@@ -155,6 +95,16 @@ class APIClient:
         """FIO ni yangilash"""
         payload = {"fio": new_fio}
         return await self.request("PATCH", f"register/{telegram_id}/", json=payload)
+
+    async def select_all_custom_users(self) -> Optional[List[Dict]]:
+        """Barcha CustomUser foydalanuvchilarni olish"""
+        result = await self.request("GET", "custom-users/")
+        return result.get('results') if result and 'results' in result else result
+
+    async def select_all_register_users(self) -> Optional[List[Dict]]:
+        """Register jadvalidagi barcha foydalanuvchilarni olish"""
+        result = await self.request("GET", "register-users/")
+        return result.get('results') if result and 'results' in result else result
 
     async def delete_registered_user(self, telegram_id: int) -> bool:
         """Ro'yxatdan foydalanuvchini o'chirish"""

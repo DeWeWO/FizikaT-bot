@@ -8,4 +8,5 @@ class Test(StatesGroup):
 
 class AdminState(StatesGroup):
     are_you_sure = State()
-    ask_ad_content = State()
+    ask_admin_ad_content = State()
+    ask_register_ad_content = State()

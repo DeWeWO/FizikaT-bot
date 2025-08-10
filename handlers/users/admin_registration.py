@@ -27,7 +27,7 @@ async def start_admin_registration(message: Message, state: FSMContext):
     
     await message.answer(
         "🔐 Admin ro'yxatdan o'tish jarayonini boshlaymiz.\n\n"
-        "Ismingizni kiriting:\n"
+        "Ismingizni kiriting:\n\n"
         "❌ Bekor qilish uchun /cancel"
     )
     await state.set_state(AdminRegistration.waiting_for_first_name)
@@ -53,6 +53,7 @@ async def process_first_name(message: Message, state: FSMContext):
 async def process_last_name(message: Message, state: FSMContext):
     """Familiya qabul qilish"""
     last_name = message.text.strip()
+    username = message.from_user.id
     
     if len(last_name) < 2:
         await message.answer("❌ Familiya kamida 2 ta belgidan iborat bo'lishi kerak. Qaytadan kiriting:")
@@ -62,42 +63,10 @@ async def process_last_name(message: Message, state: FSMContext):
         await message.answer("❌ Familiya faqat harflardan iborat bo'lishi kerak. Qaytadan kiriting:")
         return
     
-    await state.update_data(last_name=last_name)
+    await state.update_data(last_name=last_name, username=username)
     
     await message.answer(
-        "Django admin paneli uchun username (login) kiriting:\n\n"
-        "📝 Username talablari:\n"
-        "• Kamida 3 ta belgi\n"
-        "• Faqat harflar, raqamlar va _ belgisi\n"
-        "• Masalan: admin_john, user123, my_admin\n\n"
-        "Username kiriting:"
-    )
-    await state.set_state(AdminRegistration.waiting_for_username)
-
-@admin_router.message(AdminRegistration.waiting_for_username)
-async def process_username(message: Message, state: FSMContext):
-    """Username qabul qilish va tekshirish"""
-    username = message.text.strip().lower()
-    
-    # Username validatsiyasi
-    if len(username) < 3:
-        await message.answer("❌ Username kamida 3 ta belgidan iborat bo'lishi kerak!")
-        return
-    
-    if not re.match(r'^[a-z0-9_]+$', username):
-        await message.answer("❌ Username faqat kichik harflar, raqamlar va _ belgisini o'z ichiga olishi mumkin!")
-        return
-    
-    # Username mavjudligini tekshirish
-    is_available = await check_username_availability(username)
-    if not is_available:
-        await message.answer(f"❌ '{username}' username allaqachon band! Boshqa username tanlang:")
-        return
-    
-    await state.update_data(username=username)
-    
-    await message.answer(
-        f"✅ Username: {username}\n\n"
+        f"👤 Username: {username}\n\n"
         f"Endi xavfsiz parol yarating:\n\n"
         f"🔒 Parol talablari:\n"
         f"• Kamida 8 ta belgi\n"
@@ -127,17 +96,54 @@ async def process_password(message: Message, state: FSMContext):
     except Exception:
         pass
     
-    await state.update_data(password=password)
+    # Parolni vaqtincha saqlash
+    await state.update_data(temp_password=password)
+    
+    await message.answer(
+        "✅ Parol qabul qilindi!\n\n"
+        "🔄 Xavfsizlik uchun parolni qayta kiriting:"
+    )
+    await state.set_state(AdminRegistration.waiting_for_password_confirmation)
+
+@admin_router.message(AdminRegistration.waiting_for_password_confirmation)
+async def process_password_confirmation(message: Message, state: FSMContext):
+    """Parol tasdiqlashni qabul qilish"""
+    confirmation_password = message.text.strip()
+    
+    # Xavfsizlik uchun parol xabarini darhol o'chirish
+    try:
+        await message.delete()
+    except Exception:
+        pass
+    
+    # Oldingi parolni olish
     data = await state.get_data()
+    original_password = data.get('temp_password')
+    
+    # Parollarni solishtirish
+    if confirmation_password != original_password:
+        await message.answer(
+            "❌ Parollar mos kelmadi!\n\n"
+            "🔒 Iltimos, parolni qaytadan kiriting:"
+        )
+        # Vaqtincha parolni o'chirish va qayta parol kiritishni so'rash
+        await state.update_data(temp_password=None)
+        await state.set_state(AdminRegistration.waiting_for_password)
+        return
+    
+    await state.update_data(password=original_password)
+    await state.update_data(temp_password=None)
+    
+    await message.answer("✅ Parol muvaffaqiyatli tasdiqlandi!")
+    data = await state.get_data()
+    username = data.get('username', message.from_user.id)
     
     await message.answer(
         f"📝 Ma'lumotlaringizni tekshiring:\n\n"
         f"👤 Ism: {data['first_name']}\n"
         f"👤 Familiya: {data['last_name']}\n"
-        f"🔐 Username: {data['username']}\n"
-        f"🔒 Parol: {'*' * len(password)}\n"
-        f"📱 Telegram: @{message.from_user.username or 'Username yo\'q'}\n"
-        f"🆔 Telegram ID: {message.from_user.id}\n\n"
+        f"🔐 Username: {username}\n"
+        f"🔒 Parol: {'*' * len(confirmation_password)}\n\n"
         f"⚠️ Ma'lumotlar to'g'rimi?",
         reply_markup=keyboard
     )
@@ -168,8 +174,7 @@ async def confirm_registration(callback: CallbackQuery, state: FSMContext):
             await callback.message.edit_text(
                 f"🎉 Admin ro'yxatdan o'tish muvaffaqiyatli yakunlandi!\n\n"
                 f"👤 Ism-familiya: {data['first_name']} {data['last_name']}\n"
-                f"🔐 Username: {data['username']}\n"
-                f"📱 Telegram: @{callback.from_user.username or 'N/A'}\n\n"
+                f"🔐 Username: {data['username']}\n\n"
                 f"✅ Django admin panelga kirish huquqingiz faollashtirildi!\n\n"
                 f"🔗 Admin panelga kirish uchun: /admin_login\n\n"
                 f"⚠️ Login ma'lumotlarini xavfsiz saqlang!"
@@ -238,7 +243,6 @@ async def admin_login_command(message: Message):
                             f"👤 Username: {username}\n"
                             f"🔗 <a href='{admin_url}'>Django Admin Panelga kirish</a>\n\n"
                             f"⚠️ Bu havola faqat siz uchun!\n"
-                            f"🔒 Havola 10 daqiqadan so'ng yaroqsiz bo'ladi.\n"
                             f"🚫 Hech kim bilan ulashmang!",
                             parse_mode="HTML",
                             disable_web_page_preview=True

@@ -3,18 +3,6 @@ from openpyxl.styles import Font
 
 
 async def export_to_excel(data, headings, filepath):
-    """
-    Exports data from PostgreSQL to an Excel spreadsheet using psycopg2.
-
-    Arguments:
-    connection - an open psycopg2 (this function does not close the connection)
-    query_string - SQL to get data
-    headings - list of strings to use as column headings
-    filepath - path and filename of the Excel file
-
-    psycopg2 and file handling errors bubble up to calling code.
-    """
-
     wb = openpyxl.Workbook()
     sheet = wb.active
 
