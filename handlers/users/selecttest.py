@@ -4,7 +4,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
 router = Router()
 
-WEBAPP_BASE_URL = "https://c5e80966c40d.ngrok-free.app/api/categories/"
+WEBAPP_BASE_URL = "https://2b3df24d6232.ngrok-free.app/api/categories/"
 
 @router.callback_query(F.data.startswith("select_category:"))
 async def select_category(callback: types.CallbackQuery, state: FSMContext):
@@ -20,7 +20,6 @@ async def select_category(callback: types.CallbackQuery, state: FSMContext):
         slug  # agar topilmasa, slugni o'zini ishlatadi
     )
     telegram_id = callback.from_user.id
-    print(telegram_id)
     # WebApp tugma
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
