@@ -1,10 +1,11 @@
 from aiogram import types, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from data import config
 
 router = Router()
 
-WEBAPP_BASE_URL = "https://2b3df24d6232.ngrok-free.app/api/categories/"
+WEBAPP_BASE_URL = f"{config.API_BASE_URL}/categories/"
 
 @router.callback_query(F.data.startswith("select_category:"))
 async def select_category(callback: types.CallbackQuery, state: FSMContext):

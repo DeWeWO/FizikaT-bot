@@ -1,21 +1,15 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
-from aiogram.filters import Command, StateFilter
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup
+from states.AdminRegistration import AdminRegistration
 import aiohttp
 import re
+from data import config
 
 admin_router = Router()
 
-class AdminRegistration(StatesGroup):
-    waiting_for_first_name = State()
-    waiting_for_last_name = State()
-    waiting_for_username = State()
-    waiting_for_password = State()
-    waiting_for_confirmation = State()
-
-DJANGO_API_URL = "https://2b3df24d6232.ngrok-free.app/api"
+DJANGO_API_URL = config.API_BASE_URL
 
 @admin_router.message(Command("register_admin"))
 async def start_admin_registration(message: Message, state: FSMContext):
@@ -240,7 +234,7 @@ async def admin_login_command(message: Message):
                     data = await response.json()
                     if data.get('success'):
                         token = data.get('session_token')
-                        admin_url = f"https://2b3df24d6232.ngrok-free.app/api/telegram-login/{token}/"
+                        admin_url = f"{DJANGO_API_URL}/telegram-login/{token}/"
                         username = data.get('username', 'N/A')
                         
                         superuser_text = "🔥 Superuser" if data.get('is_superuser') else "👤 Admin"
