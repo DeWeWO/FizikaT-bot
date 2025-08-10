@@ -6,6 +6,7 @@ from states.AdminRegistration import AdminRegistration
 import aiohttp
 import re
 from data import config
+from keyboards.inline.buttons import keyboard
 
 admin_router = Router()
 
@@ -128,13 +129,6 @@ async def process_password(message: Message, state: FSMContext):
     
     await state.update_data(password=password)
     data = await state.get_data()
-    
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [
-            InlineKeyboardButton(text="✅ Tasdiqlash", callback_data="confirm_admin_reg"),
-            InlineKeyboardButton(text="❌ Bekor qilish", callback_data="cancel_admin_reg")
-        ]
-    ])
     
     await message.answer(
         f"📝 Ma'lumotlaringizni tekshiring:\n\n"
