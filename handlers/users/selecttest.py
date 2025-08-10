@@ -4,7 +4,6 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from data import config
 
 router = Router()
-
 WEBAPP_BASE_URL = f"{config.API_BASE_URL}/categories/"
 
 @router.callback_query(F.data.startswith("select_category:"))
