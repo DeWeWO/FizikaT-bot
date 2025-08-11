@@ -1,8 +1,5 @@
 from aiogram import Router
 
-from filters import ChatPrivateFilter, ChatGroupFilter
-
-
 def setup_routers() -> Router:
     from .users import (
         admin, start, help, register, selecttest, starttest,
