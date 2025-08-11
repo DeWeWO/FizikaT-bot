@@ -6,6 +6,7 @@ from states.AdminRegistration import AdminRegistration
 import re
 from data import config
 from keyboards.inline.buttons import keyboard
+from keyboards.reply.buttons import for_admin
 from loader import db
 
 admin_router = Router()
@@ -177,7 +178,8 @@ async def confirm_registration(callback: CallbackQuery, state: FSMContext):
                 f"🔐 Username: {data['username']}\n\n"
                 f"✅ Ma'lumotlaringiz saqlandi!\n\n"
                 f"🔗 Admin panelga kirish uchun: <b>✏️ Test tuzish</b> tugmasini bosing\n\n"
-                f"⚠️ Login ma'lumotlarini xavfsiz saqlang!"
+                f"⚠️ Login ma'lumotlarini xavfsiz saqlang!",
+                reply_markup=for_admin()
             )
         else:
             await callback.message.edit_text(
