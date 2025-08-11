@@ -100,6 +100,11 @@ class APIClient:
         """Barcha CustomUser foydalanuvchilarni olish"""
         result = await self.request("GET", "custom-users/")
         return result.get('results') if result and 'results' in result else result
+    
+    async def create_admin_user(self, user_data: Dict) -> Optional[Dict]:
+        """Telegram bot orqali admin user yaratish"""
+        result = await self.request("POST", "telegram-admin-register/", data=user_data)
+        return result
 
     async def select_all_register_users(self) -> Optional[List[Dict]]:
         """Register jadvalidagi barcha foydalanuvchilarni olish"""

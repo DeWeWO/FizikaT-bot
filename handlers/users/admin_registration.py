@@ -1,16 +1,16 @@
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from states.AdminRegistration import AdminRegistration
-import aiohttp
 import re
 from data import config
 from keyboards.inline.buttons import keyboard
+from loader import db
 
 admin_router = Router()
 
-DJANGO_API_URL = config.API_BASE_URL
+DJANGO_API_URL = config.ADMIN_URL
 
 @admin_router.message(Command("register_admin"))
 async def start_admin_registration(message: Message, state: FSMContext):
@@ -21,7 +21,7 @@ async def start_admin_registration(message: Message, state: FSMContext):
     if is_admin:
         await message.answer(
             "✅ Siz allaqachon admin sifatida ro'yxatdan o'tgansiz!\n"
-            "Admin panelga kirish uchun /admin_login buyrug'ini ishlating."
+            "Admin panelga kirish uchun <b>✏️ Test tuzish</b> tugmasini bosing."
         )
         return
     
@@ -155,35 +155,33 @@ async def confirm_registration(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text("⏳ Admin akkauntini yaratyapman...")
     
     data = await state.get_data()
+    telegram_id = callback.from_user.id
     
-    registration_data = {
-        "telegram_id": callback.from_user.id,
+    # Custom user jadvalga qo'shish uchun ma'lumotlar
+    custom_user_data = {
+        "telegram_id": telegram_id,
         "first_name": data['first_name'],
         "last_name": data['last_name'],
         "username": data['username'],
-        "password": data['password'],
-        "telegram_username": callback.from_user.username,
-        "is_superuser": True,  # yoki False qilib qo'yishingiz mumkin
-        "is_staff": True
+        "password": data['password']
     }
     
-    success = await register_admin_api(registration_data)
-    
     try:
-        if success.get('success'):
+        # Custom user jadvalga admin ma'lumotlarini qo'shish
+        success = await add_custom_user(custom_user_data)
+        
+        if success:
             await callback.message.edit_text(
                 f"🎉 Admin ro'yxatdan o'tish muvaffaqiyatli yakunlandi!\n\n"
                 f"👤 Ism-familiya: {data['first_name']} {data['last_name']}\n"
                 f"🔐 Username: {data['username']}\n\n"
-                f"✅ Django admin panelga kirish huquqingiz faollashtirildi!\n\n"
-                f"🔗 Admin panelga kirish uchun: /admin_login\n\n"
+                f"✅ Ma'lumotlaringiz saqlandi!\n\n"
+                f"🔗 Admin panelga kirish uchun: <b>✏️ Test tuzish</b> tugmasini bosing\n\n"
                 f"⚠️ Login ma'lumotlarini xavfsiz saqlang!"
             )
         else:
-            error_message = success.get('message', 'Noma\'lum xatolik')
             await callback.message.edit_text(
-                f"❌ Ro'yxatdan o'tishda xatolik:\n\n"
-                f"{error_message}\n\n"
+                f"❌ Ro'yxatdan o'tishda xatolik yuz berdi!\n\n"
                 f"🔄 Qaytadan urinish: /register_admin"
             )
     except Exception as e:
@@ -216,54 +214,6 @@ async def cancel_any_process(message: Message, state: FSMContext):
         "🔄 Qaytadan boshlash: /register_admin"
     )
 
-@admin_router.message(Command("admin_login"))
-async def admin_login_command(message: Message):
-    """Admin panelga kirish havolasi"""
-    telegram_id = message.from_user.id
-    
-    await message.answer("🔍 Admin huquqlaringizni tekshiryapman...")
-    
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f"{DJANGO_API_URL}/get-admin-token/{telegram_id}/",
-                headers={"ngrok-skip-browser-warning": "true"}
-            ) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    if data.get('success'):
-                        token = data.get('session_token')
-                        admin_url = f"{DJANGO_API_URL}/telegram-login/{token}/"
-                        username = data.get('username', 'N/A')
-                        
-                        superuser_text = "🔥 Superuser" if data.get('is_superuser') else "👤 Admin"
-                        
-                        await message.answer(
-                            f"✅ {superuser_text} huquqlari tasdiqlandi!\n\n"
-                            f"👤 Username: {username}\n"
-                            f"🔗 <a href='{admin_url}'>Django Admin Panelga kirish</a>\n\n"
-                            f"⚠️ Bu havola faqat siz uchun!\n"
-                            f"🚫 Hech kim bilan ulashmang!",
-                            parse_mode="HTML",
-                            disable_web_page_preview=True
-                        )
-                    else:
-                        await message.answer(
-                            "❌ Sizda admin huquqlari yo'q!\n\n"
-                            "🔐 Admin bo'lish uchun: /register_admin"
-                        )
-                else:
-                    await message.answer(
-                        "❌ Server bilan bog'lanishda muammo!\n\n"
-                        "🔄 Qaytadan urinib ko'ring: /admin_login"
-                    )
-    except Exception as e:
-        print(f"Admin login error: {e}")
-        await message.answer(
-            "❌ Xatolik yuz berdi!\n\n"
-            "🔄 Qaytadan urinish: /admin_login"
-        )
-
 @admin_router.message(Command("admin_help"))
 async def admin_help_command(message: Message):
     """Admin buyruqlari haqida yordam"""
@@ -274,7 +224,7 @@ async def admin_help_command(message: Message):
 /register_admin - Admin sifatida ro'yxatdan o'tish
 
 🔗 Kirish:
-/admin_login - Admin panel linkini olish
+/admin_login - Admin panel login ma'lumotlarini olish
 
 🆘 Yordam:
 /admin_help - Bu yordam ma'lumoti
@@ -282,10 +232,9 @@ async def admin_help_command(message: Message):
 
 📋 Ro'yxatdan o'tish jarayoni:
 1️⃣ Ism-familiyangizni kiriting
-2️⃣ Django uchun username tanlang
-3️⃣ Xavfsiz parol yarating
-4️⃣ Ma'lumotlarni tasdiqlang
-5️⃣ Admin panelga kiring!
+2️⃣ Xavfsiz parol yarating
+3️⃣ Ma'lumotlarni tasdiqlang
+4️⃣ Admin panelga kiring!
 
 ⚠️ Eslatma: Login ma'lumotlarini xavfsiz saqlang!
     """
@@ -313,50 +262,142 @@ def validate_password(password: str) -> dict:
 
 # API functions
 async def check_existing_admin(telegram_id: int) -> bool:
-    """Mavjud admin ekanligini tekshirish"""
+    """Custom user jadvalidan admin ekanligini tekshirish"""
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f"{DJANGO_API_URL}/check-telegram-admin/{telegram_id}/",
-                headers={"ngrok-skip-browser-warning": "true"}
-            ) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    return data.get('is_admin', False)
-                return False
+        custom_users = await db.select_all_custom_users()
+        if custom_users:
+            for user in custom_users:
+                if user.get('telegram_id') == telegram_id:
+                    return True
+        return False
     except Exception as e:
         print(f"Admin check error: {e}")
         return False
 
-async def check_username_availability(username: str) -> bool:
-    """Username mavjudligini tekshirish"""
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f"{DJANGO_API_URL}/check-username/{username}/",
-                headers={"ngrok-skip-browser-warning": "true"}
-            ) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    return data.get('available', False)
-                return False
-    except Exception as e:
-        print(f"Username check error: {e}")
-        return False
+import aiohttp
+import json
+import logging
 
-async def register_admin_api(registration_data: dict) -> dict:
-    """Django API orqali admin ro'yxatdan o'tkazish"""
+logger = logging.getLogger(__name__)
+
+async def create_admin_user_fixed(user_data: dict, base_url: str = "http://localhost:8000"):
+    """To'g'ri URL bilan admin user yaratish"""
+    
+    # URL ni to'g'ri yig'ish - slash muammosini hal qilish
+    if base_url.endswith('/'):
+        base_url = base_url.rstrip('/')
+    
+    # URL pattern ga mos ravishda
+    api_url = f"{base_url}/api/telegram-admin-register/"  # path pattern: 'api/telegram-admin-register/'
+    
+    logger.info(f"=== API SO'ROV ===")
+    logger.info(f"URL: {api_url}")
+    logger.info(f"Ma'lumotlar: {user_data}")
+    
     try:
+        headers = {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Accept': 'application/json',
+        }
+        
+        # Ma'lumotlarni JSON ga aylantirish
+        json_payload = json.dumps(user_data, ensure_ascii=False)
+        logger.info(f"JSON payload: {json_payload}")
+        
+        timeout = aiohttp.ClientTimeout(total=30)
+        
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                f"{DJANGO_API_URL}/telegram-admin-register/",
-                json=registration_data,
-                headers={"ngrok-skip-browser-warning": "true"}
+                api_url,
+                data=json_payload,  # data= ishlatish (json= emas)
+                headers=headers,
+                timeout=timeout
             ) as response:
-                return await response.json()
-    except Exception as e:
-        print(f"Registration API error: {e}")
+                
+                logger.info(f"Response status: {response.status}")
+                
+                # Response textini olish
+                response_text = await response.text()
+                logger.info(f"Response text: {response_text}")
+                
+                # Status kodiga qarab javob berish
+                if response.status == 200:
+                    try:
+                        result = json.loads(response_text)
+                        return result
+                    except json.JSONDecodeError:
+                        return {
+                            'success': False,
+                            'message': f'Noto\'g\'ri JSON javob: {response_text}'
+                        }
+                
+                elif response.status == 400:
+                    try:
+                        error_data = json.loads(response_text)
+                        return error_data
+                    except json.JSONDecodeError:
+                        return {
+                            'success': False,
+                            'message': f'400 Error: {response_text}'
+                        }
+                
+                else:
+                    return {
+                        'success': False,
+                        'message': f'HTTP {response.status}: {response_text}'
+                    }
+    
+    except aiohttp.ClientError as e:
+        logger.error(f"Client xatoligi: {e}")
         return {
             'success': False,
-            'message': f'Server bilan bog\'lanishda xatolik: {str(e)}'
+            'message': f'Connection xatoligi: {str(e)}'
         }
+    except Exception as e:
+        logger.error(f"Kutilmagan xatolik: {e}")
+        return {
+            'success': False,
+            'message': f'Kutilmagan xatolik: {str(e)}'
+        }
+
+# Yangilangan add_custom_user funksiyasi
+async def add_custom_user(user_data: dict) -> bool:
+    """Custom user jadvalga admin qo'shish - yangilangan"""
+    try:
+        # Ma'lumotlarni validatsiya qilish
+        required_fields = ['telegram_id', 'first_name', 'last_name', 'username', 'password']
+        for field in required_fields:
+            if not user_data.get(field):
+                logger.error(f"Majburiy maydon yo'q: {field}")
+                return False
+        
+        # Ma'lumotlarni to'g'ri formatga keltirish
+        complete_user_data = {
+            "telegram_id": int(user_data['telegram_id']),
+            "first_name": str(user_data['first_name']).strip(),
+            "last_name": str(user_data['last_name']).strip(),
+            "username": str(user_data['username']).strip().lower(),
+            "password": str(user_data['password']),
+            "telegram_username": user_data.get('telegram_username', ''),
+            "is_staff": True,
+            "is_superuser": True
+        }
+        
+        logger.info(f"Admin user yaratish uchun so'rov: {complete_user_data['username']}")
+        
+        # API ga so'rov yuborish
+        result = await create_admin_user_fixed(complete_user_data)
+        
+        # Natijani tekshirish
+        if result and result.get('success'):
+            logger.info("Admin user muvaffaqiyatli yaratildi")
+            return True
+        else:
+            error_msg = result.get('message', 'Noma\'lum xatolik') if result else 'Server javob bermadi'
+            logger.error(f"Admin user yaratishda xatolik: {error_msg}")
+            print(f"Xatolik: {error_msg}")  # Debug uchun
+            return False
+            
+    except Exception as e:
+        logger.error(f"add_custom_user xatoligi: {e}")
+        return False
