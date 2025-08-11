@@ -92,16 +92,20 @@ async def aiogram_on_shutdown_polling(dispatcher: Dispatcher, bot: Bot):
     except:
         pass
     
-    # Session yopish
-    if hasattr(bot, 'session') and bot.session and not bot.session.closed:
-        await bot.session.close()
+    # Session yopish - aiogram 3.x uchun to'g'ri usul
+    try:
+        if hasattr(bot, 'session') and bot.session:
+            # aiogram 3.x da session.closed yo'q, shuning uchun to'g'ridan-to'g'ri yopamiz
+            await bot.session.close()
+    except Exception as e:
+        print(f"Session yopishda xatolik: {e}")
     
     # Storage yopish
-    if hasattr(dispatcher, 'storage') and dispatcher.storage:
-        try:
+    try:
+        if hasattr(dispatcher, 'storage') and dispatcher.storage:
             await dispatcher.storage.close()
-        except:
-            pass
+    except Exception as e:
+        print(f"Storage yopishda xatolik: {e}")
     
     print("✅ Bot to'xtatildi")
 
@@ -127,6 +131,15 @@ async def main():
     bot = None
     dispatcher = None
     
+    def signal_handler(signum, frame):
+        """Signal handler"""
+        print(f"\n🛑 Signal {signum} qabul qilindi. Bot to'xtatilmoqda...")
+        raise KeyboardInterrupt()
+    
+    # Signal handlerlarni o'rnatish
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    
     try:
         # Konfiguratsiya yuklash
         from data.config import BOT_TOKEN
@@ -140,11 +153,12 @@ async def main():
         dispatcher.startup.register(aiogram_on_startup_polling)
         dispatcher.shutdown.register(aiogram_on_shutdown_polling)
         
-        # Polling boshlatish
+        # Polling boshlatish - aiogram 3.x uchun optimallashtirilgan
         await dispatcher.start_polling(
             bot,
-            close_bot_session=True,
-            allowed_updates=['message', 'callback_query', 'inline_query']
+            close_bot_session=False,  # Biz o'zimiz yopamiz
+            allowed_updates=['message', 'callback_query', 'inline_query'],
+            handle_signals=False  # Signal handlingni o'zimiz qilamiz
         )
         
     except KeyboardInterrupt:
@@ -154,12 +168,10 @@ async def main():
         import traceback
         traceback.print_exc()
     finally:
-        # To'g'ri cleanup
+        # To'g'ri cleanup - aiogram 3.x uchun
         if bot and hasattr(bot, 'session') and bot.session:
             try:
-                # aiogram 3.x uchun to'g'ri session yopish
-                if hasattr(bot.session, 'close') and not getattr(bot.session, 'closed', True):
-                    await bot.session.close()
+                await bot.session.close()
             except Exception as e:
                 print(f"Session yopishda xatolik: {e}")
         
