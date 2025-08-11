@@ -20,3 +20,10 @@ def get_test():
         [KeyboardButton(text='✏️ Ismni tahrirlash')]
     ], resize_keyboard=True, one_time_keyboard=False)
     return murkup
+
+def for_admin():
+    murkup = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text='📝 Test ishlash')],
+        [KeyboardButton(text='✏️ Test tuzish')]
+    ], resize_keyboard=True, one_time_keyboard=False)
+    return murkup

@@ -1,19 +1,46 @@
+import logging
 from aiogram import Router, types
 from aiogram.filters import CommandStart
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.client.session.middlewares.request_logging import logger
-from loader import db, bot
+from loader import db
 from data.config import ADMINS
+from aiogram import Bot
 from utils.extra_datas import make_title
-from keyboards.reply.buttons import register_markup, get_test
+from keyboards.reply.buttons import register_markup, get_test, for_admin
+from data.config import ADMINS
 
 router = Router()
 
 
 @router.message(CommandStart())
-async def do_start(message: types.Message):
+async def do_start(message: types.Message, bot: Bot):
     telegram_id = message.from_user.id
-
+    
+    # Admin tekshiruvi (custom user jadvalidan)
+    try:
+        custom_users = await db.select_all_custom_users()
+        is_admin = False
+        if custom_users:
+            # Custom user jadvalida telegram_id mavjudligini tekshirish
+            for user in custom_users:
+                if user.get('telegram_id') == telegram_id:
+                    is_admin = True
+                    break
+        
+        if is_admin:
+            await message.answer(
+                "✅ Admin sifatida tizimga kirdingiz.",
+                reply_markup=for_admin(),
+                parse_mode=ParseMode.HTML
+            )
+            logger.info(f"Admin foydalanuvchiga javob yuborildi: {telegram_id}")
+            return
+            
+    except Exception as error:
+        logger.error(f"Admin check error: {error}")
+        # Admin tekshiruvida xatolik bo'lsa, oddiy foydalanuvchi sifatida davom etish
+    
     # Ro'yxatdan o'tganligini tekshirish
     try:
         # API endpoint ishlatamiz
@@ -31,7 +58,7 @@ async def do_start(message: types.Message):
             logger.info(f"Ro'yxatdan o'tgan foydalanuvchiga javob yuborildi: {telegram_id}")
         else:
             # Salomlashish xabari
-            greeting_text = f"Assalomu Aleykum,\nTest ishlash uchun ro'yxatdan o'ting \\."
+            greeting_text = f"Assalomu Aleykum,\nTest ishlash uchun ro'yxatdan o'ting\\."
             
             await message.answer(
                 greeting_text,
@@ -41,7 +68,4 @@ async def do_start(message: types.Message):
             
     except Exception as error:
         logger.error(f"Registration check error: {error}")
-        await message.answer(
-            "Assalomu alaykum!",
-            reply_markup=register_markup()
-        )
+        await message.answer("Assalomu alaykum!", reply_markup=register_markup())
