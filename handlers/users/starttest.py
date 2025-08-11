@@ -1,10 +1,11 @@
 from aiogram import types, F, Router
 from aiogram.fsm.context import FSMContext
 from keyboards.inline.chosetest import fetch_categories, generate_category_text, generate_category_buttons
+from aiogram.enums import ChatType
 
 router = Router()
 
-@router.message(F.text == "📝 Test ishlash")
+@router.message(F.text == "📝 Test ishlash", F.chat.type.in_([ChatType.PRIVATE]))
 async def handle_test_start(message: types.Message, state: FSMContext):
     categories = await fetch_categories()
     if not categories:

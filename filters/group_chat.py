@@ -3,11 +3,10 @@ from aiogram.enums import ChatType
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 
-
-class ChatPrivateFilter(BaseFilter):
+class ChatGroupFilter(BaseFilter):
     def __init__(self, chat_types: Union[str, List[str], None] = None):
         if chat_types is None:
-            self.chat_types = [ChatType.PRIVATE]
+            self.chat_types = [ChatType.GROUP, ChatType.SUPERGROUP]
         elif isinstance(chat_types, str):
             self.chat_types = [chat_types]
         else:

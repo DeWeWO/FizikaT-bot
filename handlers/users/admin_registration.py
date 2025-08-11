@@ -8,12 +8,13 @@ from data import config
 from keyboards.inline.buttons import keyboard
 from keyboards.reply.buttons import for_admin
 from loader import db
+from aiogram.enums import ChatType
 
 admin_router = Router()
 
 DJANGO_API_URL = config.ADMIN_URL
 
-@admin_router.message(Command("register_admin"))
+@admin_router.message(Command("register_admin"), F.chat.type.in_([ChatType.PRIVATE]))
 async def start_admin_registration(message: Message, state: FSMContext):
     """Admin ro'yxatdan o'tishni boshlash"""
     telegram_id = message.from_user.id

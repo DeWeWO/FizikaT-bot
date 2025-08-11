@@ -1,6 +1,6 @@
 import logging
 import asyncio
-from aiogram import Router, types
+from aiogram import Router, types, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from loader import db, bot
@@ -9,6 +9,8 @@ from states.test import AdminState
 from filters.admin import IsBotAdminFilter
 from data.config import ADMINS
 from utils.pgtoexcel import export_to_excel
+from aiogram.enums import ChatType
+
 
 router = Router()
 
@@ -23,7 +25,7 @@ router = Router()
 #     await message.answer_document(types.input_file.FSInputFile(file_path))
 
 
-@router.message(Command('cleandb'), IsBotAdminFilter(ADMINS))
+@router.message(Command('cleandb'), IsBotAdminFilter(ADMINS), F.chat.type.in_([ChatType.PRIVATE]))
 async def ask_are_you_sure(message: types.Message, state: FSMContext):
     msg = await message.reply("Haqiqatdan ham bazani tozalab yubormoqchimisiz?", reply_markup=are_you_sure_markup)
     await state.update_data(msg_id=msg.message_id)
@@ -42,7 +44,7 @@ async def clean_db(call: types.CallbackQuery, state: FSMContext):
     await bot.edit_message_text(text=text, chat_id=call.message.chat.id, message_id=msg_id)
     await state.clear()
 
-@router.message(Command('admin_reklama'), IsBotAdminFilter(ADMINS))
+@router.message(Command('admin_reklama'), IsBotAdminFilter(ADMINS), F.chat.type.in_([ChatType.PRIVATE]))
 async def ask_admin_ad_content(message: types.Message, state: FSMContext):
     """CustomUser jadvalidagi admin foydalanuvchilarga reklama yuborish"""
     await message.answer(
@@ -115,7 +117,7 @@ async def send_ad_to_custom_users(message: types.Message, state: FSMContext):
     )
     await state.clear()
 
-@router.message(Command('telegram_reklama'), IsBotAdminFilter(ADMINS))
+@router.message(Command('telegram_reklama'), IsBotAdminFilter(ADMINS), F.chat.type.in_([ChatType.PRIVATE]))
 async def ask_register_ad_content(message: types.Message, state: FSMContext):
     """Register jadvalidagi foydalanuvchilarga reklama yuborish"""
     await message.answer(

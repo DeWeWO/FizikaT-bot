@@ -5,11 +5,13 @@ from aiogram.fsm.context import FSMContext
 from loader import db
 from keyboards.reply.buttons import register_markup, get_confirm_button, get_test
 from states import RegisterState
+from aiogram.enums import ChatType
+
 
 router = Router()
 
 # Ro'yxatdan o'tishni boshlash
-@router.message(F.text == "👤Ro'yxatdan o'tish")
+@router.message(F.text == "👤Ro'yxatdan o'tish", F.chat.type.in_([ChatType.PRIVATE]))
 async def start_register(message: types.Message, state: FSMContext):
     try:
         await message.answer(

@@ -5,11 +5,12 @@ from aiogram.fsm.context import FSMContext
 from loader import db
 from keyboards.reply.buttons import get_confirm_button, register_markup, get_test
 from states.UpdateState import UpdateFIOState
+from aiogram.enums import ChatType
 
 router = Router()
 
 # Tahrirlashni boshlash
-@router.message(F.text == "✏️ Ismni tahrirlash")
+@router.message(F.text == "✏️ Ismni tahrirlash", F.chat.type.in_([ChatType.PRIVATE]))
 async def start_update_fio(message: types.Message, state: FSMContext):
     telegram_id = message.from_user.id
 

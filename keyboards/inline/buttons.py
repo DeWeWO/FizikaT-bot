@@ -1,4 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from data.config import BOT
 
 
 inline_keyboard = [[
@@ -13,3 +14,11 @@ keyboard = InlineKeyboardMarkup(inline_keyboard=[
             InlineKeyboardButton(text="❌ Bekor qilish", callback_data="cancel_admin_reg")
         ]
     ])
+
+add_group = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(text="👥 Guruhga qo'shish", url=f"https://t.me/{BOT}?startgroup=true")
+        ]
+    ]
+)

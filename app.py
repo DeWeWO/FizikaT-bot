@@ -29,12 +29,10 @@ def setup_middlewares(dispatcher: Dispatcher, bot: Bot) -> None:
 
 
 def setup_filters(dispatcher: Dispatcher) -> None:
-    """FILTERS"""
-    try:
-        from filters import ChatPrivateFilter
-        dispatcher.message.filter(ChatPrivateFilter(chat_type=["private"]))
-    except ImportError:
-        pass
+    """FILTERS - Magic Filter ishlatiladi, custom filterlar emas"""
+    # Magic Filter (F) ishlatiladi, alohida filter setup kerak emas
+    # Filterlar to'g'ridan-to'g'ri handler fayllarida qo'llanadi
+    pass
 
 
 async def setup_aiogram(dispatcher: Dispatcher, bot: Bot) -> None:
@@ -94,11 +92,16 @@ async def aiogram_on_shutdown_polling(dispatcher: Dispatcher, bot: Bot):
     except:
         pass
     
-    if bot.session and not bot.session.closed:
+    # Session yopish
+    if hasattr(bot, 'session') and bot.session and not bot.session.closed:
         await bot.session.close()
     
-    if dispatcher.storage:
-        await dispatcher.storage.close()
+    # Storage yopish
+    if hasattr(dispatcher, 'storage') and dispatcher.storage:
+        try:
+            await dispatcher.storage.close()
+        except:
+            pass
     
     print("✅ Bot to'xtatildi")
 
@@ -121,6 +124,9 @@ async def main():
     """Asosiy funksiya"""
     setup_logging()
     
+    bot = None
+    dispatcher = None
+    
     try:
         # Konfiguratsiya yuklash
         from data.config import BOT_TOKEN
@@ -142,9 +148,26 @@ async def main():
         )
         
     except KeyboardInterrupt:
-        pass
+        print("🛑 Keyboard Interrupt - Bot to'xtatildi")
     except Exception as e:
         print(f"❌ Xatolik: {e}")
+        import traceback
+        traceback.print_exc()
+    finally:
+        # To'g'ri cleanup
+        if bot and hasattr(bot, 'session') and bot.session:
+            try:
+                # aiogram 3.x uchun to'g'ri session yopish
+                if hasattr(bot.session, 'close') and not getattr(bot.session, 'closed', True):
+                    await bot.session.close()
+            except Exception as e:
+                print(f"Session yopishda xatolik: {e}")
+        
+        if dispatcher and hasattr(dispatcher, 'storage') and dispatcher.storage:
+            try:
+                await dispatcher.storage.close()
+            except Exception as e:
+                print(f"Storage yopishda xatolik: {e}")
 
 
 if __name__ == "__main__":

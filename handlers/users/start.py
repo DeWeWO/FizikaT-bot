@@ -1,19 +1,16 @@
-import logging
-from aiogram import Router, types
+from aiogram import Router, types, F
 from aiogram.filters import CommandStart
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.client.session.middlewares.request_logging import logger
 from loader import db
-from data.config import ADMINS
 from aiogram import Bot
-from utils.extra_datas import make_title
+from aiogram.enums import ChatType
 from keyboards.reply.buttons import register_markup, get_test, for_admin
-from data.config import ADMINS
 
 router = Router()
 
 
-@router.message(CommandStart())
+@router.message(CommandStart(), F.chat.type.in_([ChatType.PRIVATE]))
 async def do_start(message: types.Message, bot: Bot):
     telegram_id = message.from_user.id
     
