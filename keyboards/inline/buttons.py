@@ -1,6 +1,8 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from data.config import BOT
+from data import config
 
+ADMIN_URL = f"{config.ADMIN_URL}"
 
 inline_keyboard = [[
     InlineKeyboardButton(text="✅ Yes", callback_data='yes'),
@@ -19,6 +21,14 @@ add_group = InlineKeyboardMarkup(
     inline_keyboard=[
         [
             InlineKeyboardButton(text="👥 Guruhga qo'shish", url=f"https://t.me/{BOT}?startgroup=true")
+        ]
+    ]
+)
+
+admin_panel = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(text="❇️ Sahifaga o'tish", url=f"{ADMIN_URL}/admin")
         ]
     ]
 )

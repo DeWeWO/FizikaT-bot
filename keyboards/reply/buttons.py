@@ -1,8 +1,6 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, WebAppInfo
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
-from data import config
 
-ADMIN_URL = f"{config.ADMIN_URL}"
 
 def register_markup(): 
     return ReplyKeyboardMarkup(resize_keyboard=True, keyboard=[
@@ -27,7 +25,7 @@ def get_test():
 def for_admin():
     murkup = ReplyKeyboardMarkup(keyboard=[
         [KeyboardButton(text='📝 Test ishlash')],
-        [KeyboardButton(text='✏️ Test tuzish', web_app=WebAppInfo(url=f"{ADMIN_URL}/admin"))],
+        [KeyboardButton(text='✏️ Test tuzish')],
         [KeyboardButton(text="👥 Guruhga qo'shish")],
     ], resize_keyboard=True, one_time_keyboard=False)
     return murkup

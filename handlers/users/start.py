@@ -27,7 +27,7 @@ async def do_start(message: types.Message, bot: Bot):
         
         if is_admin:
             await message.answer(
-                "✅ Admin sifatida tizimga kirdingiz.",
+                "✅ Admin sifatida tizimga kirdingiz.\n\n🔗 Admin panelga kirish uchun: <b>✏️ Test tuzish</b> tugmasini bosing",
                 reply_markup=for_admin(),
                 parse_mode=ParseMode.HTML
             )

@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 from states.AdminRegistration import AdminRegistration
 import re
 from data import config
-from keyboards.inline.buttons import keyboard
+from keyboards.inline.buttons import keyboard, admin_panel
 from keyboards.reply.buttons import for_admin
 from loader import db
 from aiogram.enums import ChatType
@@ -216,6 +216,11 @@ async def cancel_any_process(message: Message, state: FSMContext):
         "❌ Jarayon bekor qilindi.\n\n"
         "🔄 Qaytadan boshlash: /register_admin"
     )
+
+@admin_router.message(F.text == "✏️ Test tuzish")
+async def open_site(message: Message):
+    await message.answer("Tugmani bosib web sahifaga o'ting", reply_markup=admin_panel)
+
 
 @admin_router.message(Command("admin_help"))
 async def admin_help_command(message: Message):
