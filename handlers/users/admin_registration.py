@@ -22,7 +22,7 @@ async def start_admin_registration(message: Message, state: FSMContext):
     
     if is_admin:
         await message.answer(
-            "✅ Siz allaqachon admin sifatida ro'yxatdan o'tgansiz!\n"
+            "✅ Siz allaqachon admin sifatida ro'yxatdan o'tgansiz!\n\n"
             "Admin panelga kirish uchun <b>✏️ Test tuzish</b> tugmasini bosing."
         )
         return
