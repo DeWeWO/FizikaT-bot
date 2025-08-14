@@ -1,9 +1,11 @@
 import aiohttp
 import asyncio
+import logging
 from typing import Dict, List, Optional, Any
 from aiohttp import ClientTimeout, ClientError
-
 from data import config
+
+logger = logging.getLogger(__name__)
 
 
 class APIClient:
@@ -73,6 +75,14 @@ class APIClient:
                 
         except Exception:
             return None
+    
+    async def add_group(self, group_id: int, group_name: str) -> Optional[Dict]:
+        """Guruh ma'lumotlarini Django API ga yuborish"""
+        payload = {
+            "group_id": group_id,
+            "group_name": group_name
+        }
+        return await self.request("POST", "telegram/group/add/", json=payload)
 
     # --- REGISTER ---
     async def registered_user(self, fio: str, telegram_id: int) -> Optional[Dict]:

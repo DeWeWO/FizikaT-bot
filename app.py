@@ -157,7 +157,7 @@ async def main():
         await dispatcher.start_polling(
             bot,
             close_bot_session=False,  # Biz o'zimiz yopamiz
-            allowed_updates=['message', 'callback_query', 'inline_query'],
+            allowed_updates=['message', 'callback_query', 'inline_query', "my_chat_member"],
             handle_signals=False  # Signal handlingni o'zimiz qilamiz
         )
         

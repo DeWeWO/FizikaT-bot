@@ -154,26 +154,28 @@ async def process_password_confirmation(message: Message, state: FSMContext):
 @admin_router.callback_query(F.data == "confirm_admin_reg", AdminRegistration.waiting_for_confirmation)
 async def confirm_registration(callback: CallbackQuery, state: FSMContext):
     """Ro'yxatdan o'tishni tasdiqlash"""
-    await callback.message.edit_text("⏳ Admin akkauntini yaratyapman...")
-    
-    data = await state.get_data()
-    telegram_id = callback.from_user.id
-    
-    # Custom user jadvalga qo'shish uchun ma'lumotlar
-    custom_user_data = {
-        "telegram_id": telegram_id,
-        "first_name": data['first_name'],
-        "last_name": data['last_name'],
-        "username": data['username'],
-        "password": data['password']
-    }
-    
     try:
+        await callback.message.delete()
+        loading_msg = await callback.message.answer("⏳ Admin akkauntini yaratyapman...")
+        
+        data = await state.get_data()
+        telegram_id = callback.from_user.id
+        
+        # Custom user jadvalga qo'shish uchun ma'lumotlar
+        custom_user_data = {
+            "telegram_id": telegram_id,
+            "first_name": data['first_name'],
+            "last_name": data['last_name'],
+            "username": data['username'],
+            "password": data['password']
+        }
+    
         # Custom user jadvalga admin ma'lumotlarini qo'shish
         success = await add_custom_user(custom_user_data)
+        await loading_msg.delete()
         
         if success:
-            await callback.message.edit_text(
+            await callback.message.answer(
                 f"🎉 Admin ro'yxatdan o'tish muvaffaqiyatli yakunlandi!\n\n"
                 f"👤 Ism-familiya: {data['first_name']} {data['last_name']}\n"
                 f"🔐 Username: {data['username']}\n\n"
@@ -183,7 +185,7 @@ async def confirm_registration(callback: CallbackQuery, state: FSMContext):
                 reply_markup=for_admin()
             )
         else:
-            await callback.message.edit_text(
+            await callback.message.answer(
                 f"❌ Ro'yxatdan o'tishda xatolik yuz berdi!\n\n"
                 f"🔄 Qaytadan urinish: /register_admin"
             )
@@ -288,7 +290,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-async def create_admin_user_fixed(user_data: dict, base_url: str = "http://localhost:8000"):
+async def create_admin_user_fixed(user_data: dict, base_url=DJANGO_API_URL):
     """To'g'ri URL bilan admin user yaratish"""
     
     # URL ni to'g'ri yig'ish - slash muammosini hal qilish
