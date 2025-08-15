@@ -1,1 +1,2 @@
 from .throttling import ThrottlingMiddleware
+from .membership import MembershipMiddleware

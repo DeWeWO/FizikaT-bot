@@ -1,4 +1,5 @@
 import aiohttp
+import httpx
 import asyncio
 import logging
 from typing import Dict, List, Optional, Any
@@ -83,6 +84,16 @@ class APIClient:
             "group_name": group_name
         }
         return await self.request("POST", "telegram/group/add/", json=payload)
+    
+    async def select_all_group_ids(self) -> Optional[List[int]]:
+        result = await self.request("GET", "telegram-groups/all-ids/")
+        if not result:
+            return []
+        
+        groups = result.get("results") if "results" in result else result
+        
+        return [group.get("group_id") for group in groups if group.get("group_id")]
+    
 
     # --- REGISTER ---
     async def registered_user(self, fio: str, telegram_id: int) -> Optional[Dict]:

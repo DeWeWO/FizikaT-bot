@@ -26,6 +26,13 @@ def setup_middlewares(dispatcher: Dispatcher, bot: Bot) -> None:
         dispatcher.message.middleware(ThrottlingMiddleware(slow_mode_delay=0.5))
     except ImportError:
         pass
+    try:
+        from middlewares.membership import setup_middleware
+        setup_middleware(dispatcher)
+    except ImportError as e:
+        print(f"❌ AdminGroupMiddleware importida xatolik: {e}")
+    except Exception as e:
+        print(f"❌ AdminGroupMiddleware ulanishida xatolik: {e}")
 
 
 def setup_filters(dispatcher: Dispatcher) -> None:
