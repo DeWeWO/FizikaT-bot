@@ -9,7 +9,7 @@ router = Router()
 async def handle_test_start(message: types.Message, state: FSMContext):
     categories = await fetch_categories()
     if not categories:
-        await message.answer("❌ Kategoriyalar yuklanmadi. Keyinroq qayta urinib ko'ring.")
+        await message.answer("❌ Testlar yuklanmadi. Keyinroq qayta urinib ko'ring.")
         return
     
     await state.update_data(categories=categories)
@@ -25,7 +25,7 @@ async def navigate_categories(callback: types.CallbackQuery, state: FSMContext):
     categories = data.get("categories", [])
     
     if not categories:
-        await callback.answer("❌ Kategoriyalar topilmadi", show_alert=True)
+        await callback.answer("❌ Testlar topilmadi", show_alert=True)
         return
     
     text = generate_category_text(categories, page)
@@ -38,3 +38,11 @@ async def cancel_test(callback: types.CallbackQuery, state: FSMContext):
     await state.clear()
     await callback.message.edit_text(text="❌ Test yechish bekor qilindi.")
     await callback.answer()
+
+@router.callback_query(F.data.startswith("nav_page_disabled:"))
+async def results_nav_disabled(callback: types.CallbackQuery):
+    direction = callback.data.split(":")[1]
+    if direction == "prev":
+        await callback.answer("❌ Bu birinchi sahifa", show_alert=False)
+    else:
+        await callback.answer("❌ Bu oxirgi sahifa", show_alert=False)

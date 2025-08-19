@@ -24,8 +24,9 @@ def get_test():
 
 def for_admin():
     murkup = ReplyKeyboardMarkup(keyboard=[
-        [KeyboardButton(text='📝 Test ishlash')],
         [KeyboardButton(text='✏️ Test tuzish')],
+        [KeyboardButton(text='📊 Natijalar')],
+        [KeyboardButton(text='📝 Test ishlash')],
         [KeyboardButton(text="👥 Guruhga qo'shish")],
     ], resize_keyboard=True, one_time_keyboard=False)
     return murkup

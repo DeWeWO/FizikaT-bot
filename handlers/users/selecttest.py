@@ -34,7 +34,7 @@ async def select_category(callback: types.CallbackQuery, state: FSMContext):
 
     await callback.message.delete()
     await callback.message.answer(
-        f"✅ Siz <b>{category_title}</b> kategoriyasini tanladingiz.",
+        f"✅ Siz <b>{category_title}</b> ni tanladingiz.",
         parse_mode="HTML",
         reply_markup=keyboard
     )

@@ -23,7 +23,7 @@ def generate_category_text(categories, page):
         description = cat.get("description", "")
         
         short_desc = (description[:20] + "...") if len(description) > 20 else description
-        lines.append(f"{i}. <b>{title}</b>\n<i>{short_desc}</i>")
+        lines.append(f"{i}. <b>{title}</b> | <i>{short_desc}</i>")
 
     return "\n".join(lines)
 
@@ -52,10 +52,15 @@ def generate_category_buttons(categories, page):
     # Navigatsiya tugmalari
     nav = []
     if page > 0:
-        nav.append(InlineKeyboardButton(text="⬅ Orqaga", callback_data=f"nav_page:{page-1}"))
-    nav.append(InlineKeyboardButton(text="❌ Bekor qilish", callback_data="cancel_test"))
+        nav.append(InlineKeyboardButton(text="⬅️ Orqaga", callback_data=f"nav_page:{page-1}"))
+    else:
+        nav.append(InlineKeyboardButton(text="⬅️ Orqaga", callback_data="nav_page_disabled:prev"))
+    
+    nav.append(InlineKeyboardButton(text="❌ Bekor qilish", callback_data="cancel_statistic"))
     if end < len(categories):
-        nav.append(InlineKeyboardButton(text="Oldinga ➡", callback_data=f"nav_page:{page+1}"))
+        nav.append(InlineKeyboardButton(text="Oldinga ➡️", callback_data=f"nav_page:{page+1}"))
+    else:
+        nav.append(InlineKeyboardButton(text="Oldinga ➡️", callback_data="nav_page_disabled:next"))
 
     keyboard.inline_keyboard.append(nav)
     return keyboard

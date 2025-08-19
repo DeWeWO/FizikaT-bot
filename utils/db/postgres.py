@@ -138,6 +138,10 @@ class APIClient:
         return result is not None
 
     # --- CATEGORIES ---
+    async def get_results(self, slug: str) -> Optional[Dict]:
+        """Kategoriyaga oid natijalarni olish"""
+        return await self.request("GET", f"results/{slug}/")
+    
     async def get_categories(self) -> Optional[List[Dict]]:
         """Barcha kategoriyalarni olish"""
         result = await self.request("GET", "categories/")

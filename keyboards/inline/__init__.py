@@ -1,1 +1,1 @@
-from . import buttons, chosetest
+from . import buttons, chosetest, statistic
