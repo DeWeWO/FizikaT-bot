@@ -63,7 +63,7 @@ def generate_category_buttons(categories, page):
     keyboard.append(nav)
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
-STATIC_SIZE = 10
+STATIC_SIZE = 30
 
 def generate_results_text(results, page, category_name):
     start = page * STATIC_SIZE
