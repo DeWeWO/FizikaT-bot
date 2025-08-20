@@ -63,9 +63,11 @@ def generate_category_buttons(categories, page):
     keyboard.append(nav)
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
+STATIC_SIZE = 10
+
 def generate_results_text(results, page, category_name):
-    start = page * PAGE_SIZE
-    end = start + PAGE_SIZE
+    start = page * STATIC_SIZE
+    end = start + STATIC_SIZE
     selected = results[start:end]
     
     lines = [f"📊 <b>{category_name}</b> natijalari:\n"]
@@ -97,7 +99,7 @@ def generate_results_buttons(total_results, page, empty=False):
             InlineKeyboardButton(text="🔙 Variantlar", callback_data="back_to_categories")
         ]])
     
-    total_pages = (total_results - 1) // PAGE_SIZE + 1
+    total_pages = (total_results - 1) // STATIC_SIZE + 1
     nav = []
     
     if page > 0:
