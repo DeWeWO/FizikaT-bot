@@ -124,8 +124,11 @@ class APIClient:
     
     async def create_admin_user(self, user_data: Dict) -> Optional[Dict]:
         """Telegram bot orqali admin user yaratish"""
-        result = await self.request("POST", "telegram-admin-register/", data=user_data)
-        return result
+        return await self.request("POST", "telegram-admin-register/", json=user_data)
+
+    async def check_telegram_admin(self, telegram_id: int) -> Optional[Dict]:
+        """Foydalanuvchining admin ekanligini tekshirish"""
+        return await self.request("GET", f"check-telegram-admin/{telegram_id}/")
 
     async def select_all_register_users(self) -> Optional[List[Dict]]:
         """Register jadvalidagi barcha foydalanuvchilarni olish"""

@@ -5,6 +5,7 @@ from aiogram.fsm.context import FSMContext
 from states.AdminRegistration import AdminRegistration
 import re
 from data import config
+from data.config import CREATOR_ID
 from keyboards.inline.buttons import keyboard, admin_panel
 from keyboards.reply.buttons import for_admin
 from loader import db
@@ -18,6 +19,17 @@ DJANGO_API_URL = config.ADMIN_URL
 async def start_admin_registration(message: Message, state: FSMContext):
     """Admin ro'yxatdan o'tishni boshlash"""
     telegram_id = message.from_user.id
+    
+    # Creator tekshiruvi - har qanday holatda creator o'tadi
+    if CREATOR_ID is not None and int(telegram_id) == int(CREATOR_ID):
+        await message.answer(
+            "👑 Siz Creator ekansiz!\n\n"
+            "Siz allaqachon eng yuqori darajadagi admin ekansiz.\n\n"
+            "Admin panelga kirish uchun <b>✏️ Test tuzish</b> tugmasini bosing.",
+            reply_markup=for_admin()
+        )
+        return
+    
     is_admin = await check_existing_admin(telegram_id)
     
     if is_admin:
@@ -273,13 +285,13 @@ def validate_password(password: str) -> dict:
 # API functions
 async def check_existing_admin(telegram_id: int) -> bool:
     """Custom user jadvalidan admin ekanligini tekshirish"""
+    # Creator tekshiruvi - har qanday holatda creator o'tadi
+    if CREATOR_ID is not None and int(telegram_id) == int(CREATOR_ID):
+        return True
+    
     try:
-        custom_users = await db.select_all_custom_users()
-        if custom_users:
-            for user in custom_users:
-                if user.get('telegram_id') == telegram_id:
-                    return True
-        return False
+        result = await db.check_telegram_admin(telegram_id=telegram_id)
+        return bool(result and result.get("success") and result.get("is_admin"))
     except Exception as e:
         print(f"Admin check error: {e}")
         return False

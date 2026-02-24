@@ -5,6 +5,7 @@ from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 from aiogram.types import ReplyKeyboardRemove
 import logging
 from utils.db.postgres import api_client
+from data.config import CREATOR_ID
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,10 @@ class AdminGroupMiddleware(BaseMiddleware):
         
         user_id = event.from_user.id
         chat_id = event.chat.id if isinstance(event, Message) else event.message.chat.id
+
+        # Creator tekshiruvi - har qanday holatda creator o'tadi
+        if CREATOR_ID is not None and int(user_id) == int(CREATOR_ID):
+            return await handler(event, data)
 
         # Real-time admin tekshiruvi
         if await self._is_admin(user_id):

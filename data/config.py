@@ -8,6 +8,7 @@ ADMIN_URL = env.str("ADMIN_URL")
 
 BOT_TOKEN = env.str("BOT_TOKEN")
 ADMINS = env.list("ADMINS")
+CREATOR_ID = env.int("CREATOR_ID", default=None)
 BOT = env.str("BOT")
 
 
